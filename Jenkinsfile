@@ -9,6 +9,7 @@ pipeline {
         IMAGE_NAME = 'nodemain:v1.0'
         HOST_PORT = 3000
         CONTAINER_PORT = 3000
+        CONTAINER_NAME = 'app-main'
     }
 
     stages {
@@ -19,11 +20,13 @@ pipeline {
                         echo "Configurando para el entorno DEV"
                         IMAGE_NAME = 'nodedev:v1.0'
                         HOST_PORT = 3001
+                        CONTAINER_NAME = 'app-dev'
                     } else {
                         echo "Configurando para el entorno MAIN"
                     }
                     echo "Imagen a construir: ${IMAGE_NAME}"
                     echo "Puerto a exponer: ${HOST_PORT}"
+                    echo "Nombre del contenedor: ${CONTAINER_NAME}"
                 }
             }
         }
@@ -51,10 +54,13 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo "Desplegando ${IMAGE_NAME} en el puerto ${HOST_PORT}"
-                sh 'docker stop $(docker ps -a -q) || true'
-                sh 'docker rm $(docker ps -a -q) || true'
-                sh "docker run -d --expose ${CONTAINER_PORT} -p ${HOST_PORT}:${CONTAINER_PORT} ${IMAGE_NAME}"
+                echo "Desplegando ${IMAGE_NAME} como ${CONTAINER_NAME} en el puerto ${HOST_PORT}"
+
+                sh "docker stop ${CONTAINER_NAME} || true"
+
+                sh "docker rm ${CONTAINER_NAME} || true"
+
+                sh "docker run -d --name ${CONTAINER_NAME} --expose ${CONTAINER_PORT} -p ${HOST_PORT}:${CONTAINER_PORT} ${IMAGE_NAME}"
             }
         }
     }
