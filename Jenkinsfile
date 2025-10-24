@@ -4,6 +4,7 @@ pipeline {
     tools {
         nodejs 'node'
     }
+
     environment {
         IMAGE_NAME = 'nodemain:v1.0'
         HOST_PORT = 3000
@@ -13,10 +14,10 @@ pipeline {
     stages {
         stage('Setup Configuration') {
             steps {
-
+                script {
                     if (env.BRANCH_NAME == 'dev') {
                         echo "Configurando para el entorno DEV"
-                        IMAGE_NAME = 'nodedev:v1.0' 
+                        IMAGE_NAME = 'nodedev:v1.0'
                         HOST_PORT = 3001
                     } else {
                         echo "Configurando para el entorno MAIN"
@@ -30,7 +31,6 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Instalando dependencias npm..."
-                // Las instrucciones piden 'npm install'
                 sh 'npm install'
             }
         }
@@ -54,8 +54,8 @@ pipeline {
                 echo "Desplegando ${IMAGE_NAME} en el puerto ${HOST_PORT}"
                 sh 'docker stop $(docker ps -a -q) || true'
                 sh 'docker rm $(docker ps -a -q) || true'
-
                 sh "docker run -d --expose ${CONTAINER_PORT} -p ${HOST_PORT}:${CONTAINER_PORT} ${IMAGE_NAME}"
             }
         }
     }
+}
